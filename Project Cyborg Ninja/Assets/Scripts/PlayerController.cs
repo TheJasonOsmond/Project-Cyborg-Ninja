@@ -5,6 +5,8 @@ using UnityEngine;
 public abstract class PlayerController : MonoBehaviour
 {
     [SerializeField] GameManager _gameManager;
+    [SerializeField] GameObject aim_indicator;
+    [SerializeField] TrailRenderer _tr;
     Rigidbody2D _rb;
     Camera _mainCamera;
 
@@ -17,25 +19,33 @@ public abstract class PlayerController : MonoBehaviour
     //Mouse Fields
     Vector2 _mousePos;
     Vector2 _mouseOffset;
-    [SerializeField] GameObject aim_indicator;
+    
 
 
     //Event Fields
     protected bool isInvulnerable = false;
     protected bool isAttacking = false;
     protected bool isAiming = false;
-    protected bool isShooting = false;
+    //protected bool isShooting = false;
     protected bool inAnimation = false;
-    protected bool isdashing = false;
+
 
     //Movement Fields
     float _inputVertical;
     float _inputHorizontal;
     protected float baseMoveSpeed = 3f;
     protected float _moveSpeed = 3f;
-    
-    float _dashSpeed = 10f;
     float _moveSpeedLimiter = 0.7f;
+
+    //Dash Fields
+    bool _canDash = true;
+    bool _isdashing = false;
+    float _dashSpeed = 14f;
+    float _dashLength = 0.2f;
+    float _dashCooldown = 1f;
+    //int _dashCount = 2;
+
+    
     Vector2 _dashVelocity;
     Vector2 _moveVelocity;
     bool _moveDisabled = false;
@@ -85,83 +95,80 @@ public abstract class PlayerController : MonoBehaviour
     void Update()
     {
         //Following will only be run when player is not currently in a restrictive animation
-        if (!inAnimation)
+        if (inAnimation)
+            return;
+
+        if (Input.GetKeyDown(KeyCode.LeftShift))
         {
-            // Hold LEFTSHIFT to Aim
-            if (Input.GetKeyDown(KeyCode.LeftShift))
+            isAiming = true;
+            MoveDisabled = true;
+            aim_indicator.SetActive(true);
+        }
+        else if (Input.GetKey(KeyCode.LeftShift))
+        {
+            //Case where Shift is held during other animation
+            //Player will start aiming when animation finishes
+            if (!isAiming) 
             {
                 isAiming = true;
                 MoveDisabled = true;
                 aim_indicator.SetActive(true);
             }
-            else if (Input.GetKey(KeyCode.LeftShift))
+            //Press MOUSE1 to Shoot
+            if (Input.GetMouseButtonDown(0))
             {
-                isAiming = true;
-                MoveDisabled = true;
-                if (Input.GetMouseButtonDown(0))
-                {
-                    isShooting = true;
-                }
-
+                StartCoroutine(Fire());
             }
-            else if (Input.GetKeyUp(KeyCode.LeftShift))
-            {
-                isAiming = false;
-                MoveDisabled = false;
-                aim_indicator.SetActive(false);
-                animator.SetBool("is_aiming", false);          //Ideally keep animations out of update
+        }
+        else if (Input.GetKeyUp(KeyCode.LeftShift) && isAiming)
+        {
+            isAiming = false;
+            MoveDisabled = false;
+            aim_indicator.SetActive(false);
+            animator.SetBool("is_aiming", false);        
 
-            }
-
-
-            else if (!_moveDisabled) { 
-                _inputHorizontal = Input.GetAxisRaw("Horizontal");
-                _inputVertical = Input.GetAxisRaw("Vertical");
-
-                _moveVelocity = new Vector2(_inputHorizontal, _inputVertical) * _moveSpeed;
-
-                // Press SPACE to Dash
-                if (Input.GetKeyDown(KeyCode.Space))
-                {
-                   isdashing = true;
-                   //inAnimation = true;
-                }
-
-                // Press MOUSE 1 to Attack
-                if (Input.GetMouseButtonDown(0))
-                {
-                    isAttacking = true;
-                    
-                }
-
-            }
         }
 
 
+        else if (!_moveDisabled) { 
+            _inputHorizontal = Input.GetAxisRaw("Horizontal");
+            _inputVertical = Input.GetAxisRaw("Vertical");
+
+            _moveVelocity = new Vector2(_inputHorizontal, _inputVertical) * _moveSpeed;
+
+            // Press SPACE to Dash
+            if (Input.GetKeyDown(KeyCode.Space) && _canDash)
+            {
+                StartCoroutine(Dash());
+            }
+
+            // Press MOUSE 1 to Attack
+            if (Input.GetMouseButtonDown(0))
+            {
+                isAttacking = true;
+                    
+            }
+
+        }
     }
 
 
     private void FixedUpdate()
     {
-        
-        if (isdashing)
-        {
-            StartCoroutine(Dash());
-        }
-        else if (isAiming)
+        if (inAnimation)
+            return;
+
+        if (isAiming)
         {
             _rb.velocity = new Vector2(0,0); //Stop Movement
             //_animator.SetBool("is_walking", false);
             animator.SetBool("is_aiming", true);
             //ChangeAnimationState(PLAYER_AIM);
             RotateAimIndicator();
-            if (isShooting)
-            {
-                StartCoroutine(Fire());
-            }
         }
         else if (isAttacking)
         {
+            _rb.velocity = new Vector2(0, 0);
             Attack();
         }
         else
@@ -169,11 +176,11 @@ public abstract class PlayerController : MonoBehaviour
             MovePlayer();
         }
 
-        if (_inputHorizontal > 0 && !_facingRight)
+        if (_inputHorizontal > 0 && !_facingRight && !inAnimation)
         {
             FlipHorizontal();
         }
-        else if (_inputHorizontal < 0 && _facingRight)
+        else if (_inputHorizontal < 0 && _facingRight && !inAnimation)
         {
             FlipHorizontal();
         }
@@ -242,11 +249,18 @@ public abstract class PlayerController : MonoBehaviour
     }
     */
 
-    IEnumerator Dash()
-    {
-        // UPDATE: Make invulnerable/ I-Frames
 
+    // UPDATE: Add multiple dashes
+    IEnumerator Dash() 
+    {
+        _canDash = false;
+        _isdashing = true;
         _moveDisabled = true;
+        isInvulnerable = true;
+        inAnimation = true;
+        _tr.emitting = true;
+
+
 
         // If idle, dash forward
         if (_inputHorizontal == 0 && _inputVertical == 0)
@@ -269,19 +283,20 @@ public abstract class PlayerController : MonoBehaviour
         _rb.velocity = _dashVelocity;
 
         //Animation
-        //ChangeAnimationState(PLAYER_DASH);
-        //_animator.Settrigger("is_dashing", true);
-        inAnimation = true;
+        animator.SetTrigger("Dash");
 
-        float dashlength = 0.1f;
-        yield return new WaitForSeconds(dashlength);
+        yield return new WaitForSeconds(_dashLength);
 
+        _isdashing = false;
         _moveDisabled = false;
-        isdashing = false;
         inAnimation = false;
-        
-    }
+        isInvulnerable = false;
+        _tr.emitting = false;
 
+        yield return new WaitForSeconds(_dashCooldown);
+        _canDash = true;
+    }
+    
     void RotateAimIndicator()
     {
         _mousePos = Input.mousePosition;

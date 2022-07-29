@@ -19,7 +19,6 @@ public class PlayerActions : PlayerController
 
     protected override IEnumerator Fire()
     {
-        isShooting = false;
         GameObject bullet = Instantiate(_playerBullet, _bulletSpawn.transform.position, Quaternion.identity);
 
         bullet.GetComponent<Rigidbody2D>().velocity = MouseOffset * _bulletSpeed;
@@ -42,6 +41,7 @@ public class PlayerActions : PlayerController
         if (!animator.GetCurrentAnimatorStateInfo(0).IsName("Player_attack_1") && _firstFrame)
         {
             //This animation is already playing
+            inAnimation = true;
             animator.SetTrigger("Attack");
             //_moveSpeed = 3f;
             //MoveDisabled = false;
@@ -55,6 +55,7 @@ public class PlayerActions : PlayerController
             Debug.Log("End of Animation");
             _firstFrame = true;
             isAttacking = false;
+            inAnimation = false;
         }
             
     }
