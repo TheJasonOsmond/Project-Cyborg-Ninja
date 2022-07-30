@@ -10,8 +10,9 @@ public class PlayerActions : PlayerController
     //Bullet Fields
     [SerializeField] GameObject _playerBullet;
     [SerializeField] GameObject _bulletSpawn;
-    float _bulletSpeed = 15f;
-    int _bulletDamage = 40;
+    float _bulletSpeed = 25f;
+    int _bulletDamage = 50;
+
 
     //Attack Fields
     public LayerMask enemyLayers; 
@@ -39,6 +40,7 @@ public class PlayerActions : PlayerController
         //bullet.GetComponent<Bullet>().BulletDamage = bulletDamage;
 
         bullet.GetComponent<Rigidbody2D>().velocity = MouseOffset * _bulletSpeed;
+        bullet.transform.rotation = Quaternion.Euler(0f, 0f, aimAngle );
 
         yield return new WaitForSeconds(2);
         Destroy(bullet);

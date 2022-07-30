@@ -19,7 +19,8 @@ public abstract class PlayerController : MonoBehaviour
     //Mouse Fields
     Vector2 _mousePos;
     Vector2 _mouseOffset;
-    
+    protected float aimAngle;
+
 
 
     //Event Fields
@@ -45,7 +46,7 @@ public abstract class PlayerController : MonoBehaviour
     bool _isdashing = false;
     float _dashSpeed = 14f;
     float _dashLength = 0.2f;
-    float _dashCooldown = 1f;
+    float _dashCooldown = 0.5f;
     //int _dashCount = 2;
 
     //Attack Fields
@@ -286,10 +287,10 @@ public abstract class PlayerController : MonoBehaviour
         Vector3 screenPoint = _mainCamera.WorldToScreenPoint(transform.localPosition);
         _mouseOffset = new Vector2(_mousePos.x - screenPoint.x, _mousePos.y - screenPoint.y).normalized;
 
-        float angle = Mathf.Atan2(_mouseOffset.y, _mouseOffset.x) * Mathf.Rad2Deg; //Get angle between offsets in degrees
+        aimAngle = Mathf.Atan2(_mouseOffset.y, _mouseOffset.x) * Mathf.Rad2Deg; //Get angle between offsets in degrees
         //y axis first, otherwise it will mirror its rotation
 
-        aim_indicator.transform.rotation = Quaternion.Euler(0f, 0f, angle - 90f); //-90, fixes angle
+        aim_indicator.transform.rotation = Quaternion.Euler(0f, 0f, aimAngle - 90f); //-90, fixes angle
         //transform.rotation = Quaternion.Euler(0f, 0f, angle - 90f); //-90, fixes angle
        
     }

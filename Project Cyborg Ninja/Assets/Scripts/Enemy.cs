@@ -59,6 +59,8 @@ public class Enemy : MonoBehaviour
     }
     IEnumerator Deathtest()
     {
+        disableEnemy = true;
+        gameObject.GetComponent<BoxCollider2D>().enabled = false; 
         string deathAni = "Light Bandit_Death";
         animator.SetTrigger("Death");
 
