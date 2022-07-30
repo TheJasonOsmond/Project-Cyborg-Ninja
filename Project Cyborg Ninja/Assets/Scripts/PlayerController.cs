@@ -11,6 +11,7 @@ public abstract class PlayerController : MonoBehaviour
     Camera _mainCamera;
 
     public HealthBar healthbar;
+    
 
     //Player Fields
     string _playerName = "OZ3N";
@@ -32,6 +33,7 @@ public abstract class PlayerController : MonoBehaviour
     protected bool isAiming = false;
     protected bool inAnimation = false;
     private bool _isDead = false;
+    protected bool isPaused;
 
 
     //Movement Fields
@@ -108,6 +110,7 @@ public abstract class PlayerController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+
         _rb = gameObject.GetComponent<Rigidbody2D>();
         animator = gameObject.GetComponent<Animator>();
         _mainCamera = Camera.main;
@@ -121,8 +124,10 @@ public abstract class PlayerController : MonoBehaviour
     void Update()
     {
         //Following will only be run when player is not currently in a restrictive animation
-        if (inAnimation)
+        if (inAnimation || PauseControl.isPaused)
+        {
             return;
+        }
 
         if (Input.GetKeyDown(KeyCode.LeftShift))
         {
