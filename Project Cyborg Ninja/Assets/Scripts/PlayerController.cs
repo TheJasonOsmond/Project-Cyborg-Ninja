@@ -12,9 +12,10 @@ public abstract class PlayerController : MonoBehaviour
 
     //Player Fields
     string _playerName = "OZ3N";
-    int _playerHealth = 100;
+    int _currentHealth = 100;
     int _playerMaxHealth = 100;
     int _playerLevel = 0;
+    float _invulnerableLength = 1f;
 
     //Mouse Fields
     Vector2 _mousePos;
@@ -295,9 +296,36 @@ public abstract class PlayerController : MonoBehaviour
        
     }
 
+    public void takeDamage(int damage)
+    {
+        if (isInvulnerable)
+            return;
+
+        animator.SetTrigger("Hurt");
+        _currentHealth -= damage;
+
+        if (_currentHealth <= 0)
+        {
+            _currentHealth = 0;
+            //Death();
+        }
+        
+        else StartCoroutine(InvulnerabiltyPeriod());
+
+        Debug.Log("Player Health: " + _currentHealth);
+    }
+
+    IEnumerator InvulnerabiltyPeriod()
+    {
+        isInvulnerable = true;
+        yield return new WaitForSeconds(_invulnerableLength);
+        isInvulnerable = false;
+    }
+
     protected abstract IEnumerator Fire();
 
     protected abstract IEnumerator Attack();
+
     //Take Damage
 
 

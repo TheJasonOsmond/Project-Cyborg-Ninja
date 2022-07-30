@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2695976798336856712}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Player_aim_indicator
   m_TagString: Aim Indicator
   m_Icon: {fileID: 0}
@@ -48,7 +48,7 @@ GameObject:
   - component: {fileID: 2695976798665014803}
   - component: {fileID: 2695976798665014802}
   - component: {fileID: 2695976798665014801}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Player
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -334,7 +334,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2695976798821623711}
   - component: {fileID: 2695976798821623710}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Aim_visual
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -417,7 +417,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2695976799375357274}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: AttackPoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
