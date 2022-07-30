@@ -4,11 +4,14 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
+    public bool _gameOver = false;
+
     public static GameManager Instance;
 
     private void Awake()
     {
         Instance = this;
+
     }
 
 

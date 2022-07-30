@@ -24,9 +24,7 @@ public abstract class PlayerController : MonoBehaviour
 
     //Event Fields
     protected bool isInvulnerable = false;
-    protected bool isAttacking = false;
     protected bool isAiming = false;
-    //protected bool isShooting = false;
     protected bool inAnimation = false;
 
 
@@ -37,6 +35,11 @@ public abstract class PlayerController : MonoBehaviour
     protected float _moveSpeed = 3f;
     float _moveSpeedLimiter = 0.7f;
 
+    Vector2 _dashVelocity;
+    Vector2 _moveVelocity;
+    bool _moveDisabled = false;
+    bool _facingRight = true;
+
     //Dash Fields
     bool _canDash = true;
     bool _isdashing = false;
@@ -45,11 +48,9 @@ public abstract class PlayerController : MonoBehaviour
     float _dashCooldown = 1f;
     //int _dashCount = 2;
 
-    
-    Vector2 _dashVelocity;
-    Vector2 _moveVelocity;
-    bool _moveDisabled = false;
-    bool _facingRight = true;
+    //Attack Fields
+    protected bool isAttacking = false;
+    protected float attackMoveSpeedMod = 0.3f;
     
     //Animations and states
     protected Animator animator;
@@ -129,7 +130,6 @@ public abstract class PlayerController : MonoBehaviour
 
         }
 
-
         else if (!_moveDisabled) { 
             _inputHorizontal = Input.GetAxisRaw("Horizontal");
             _inputVertical = Input.GetAxisRaw("Vertical");
@@ -143,10 +143,10 @@ public abstract class PlayerController : MonoBehaviour
             }
 
             // Press MOUSE 1 to Attack
-            if (Input.GetMouseButtonDown(0))
+            else if (Input.GetMouseButtonDown(0))
             {
-                isAttacking = true;
-                    
+                if (!isAttacking)
+                StartCoroutine(Attack());
             }
 
         }
@@ -157,33 +157,30 @@ public abstract class PlayerController : MonoBehaviour
     {
         if (inAnimation)
             return;
-
-        if (isAiming)
+        else if (isAiming)
         {
             _rb.velocity = new Vector2(0,0); //Stop Movement
             //_animator.SetBool("is_walking", false);
             animator.SetBool("is_aiming", true);
-            //ChangeAnimationState(PLAYER_AIM);
             RotateAimIndicator();
-        }
-        else if (isAttacking)
-        {
-            _rb.velocity = new Vector2(0, 0);
-            Attack();
         }
         else
         {
             MovePlayer();
         }
 
-        if (_inputHorizontal > 0 && !_facingRight && !inAnimation)
+        if (!inAnimation && !isAttacking) //Blocks flipping during Animations and Attacks
         {
-            FlipHorizontal();
+            if (_inputHorizontal > 0 && !_facingRight)
+            {
+                FlipHorizontal();
+            }
+            else if (_inputHorizontal < 0 && _facingRight)
+            {
+                FlipHorizontal();
+            }
         }
-        else if (_inputHorizontal < 0 && _facingRight && !inAnimation)
-        {
-            FlipHorizontal();
-        }
+     
     }
 
     void MovePlayer()
@@ -197,6 +194,10 @@ public abstract class PlayerController : MonoBehaviour
                 _moveVelocity *= _moveSpeedLimiter;
             }
 
+            if (isAttacking)
+            {
+                _moveVelocity *= attackMoveSpeedMod;
+            }
             //Physics
             _rb.velocity = _moveVelocity;
 
@@ -222,7 +223,6 @@ public abstract class PlayerController : MonoBehaviour
 
             //Animation
             animator.SetBool("is_walking", false);
-            //ChangeAnimationState(PLAYER_IDLE);
         }
     }
 
@@ -235,21 +235,6 @@ public abstract class PlayerController : MonoBehaviour
         _facingRight = !_facingRight;
     }
 
-    /*protected void ChangeAnimationState(string newState)
-    {
-        // Stop Animation from interupting self
-        if (_currentState == newState || inAnimation) return;
-
-        //Play new animation
-        animator.Play(newState);
-        
-        //update currentstate
-        _currentState = newState;
-    
-    }
-    */
-
-
     // UPDATE: Add multiple dashes
     IEnumerator Dash() 
     {
@@ -259,8 +244,6 @@ public abstract class PlayerController : MonoBehaviour
         isInvulnerable = true;
         inAnimation = true;
         _tr.emitting = true;
-
-
 
         // If idle, dash forward
         if (_inputHorizontal == 0 && _inputVertical == 0)
@@ -313,7 +296,7 @@ public abstract class PlayerController : MonoBehaviour
 
     protected abstract IEnumerator Fire();
 
-    protected abstract void Attack();
+    protected abstract IEnumerator Attack();
     //Take Damage
 
 

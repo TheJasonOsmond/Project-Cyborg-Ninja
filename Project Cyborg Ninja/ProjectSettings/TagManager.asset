@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Aim Indicator
   - Player Bullet
+  - Enemy
   layers:
   - Default
   - TransparentFX
@@ -13,9 +14,9 @@ TagManager:
   - 
   - Water
   - UI
-  - 
-  - 
-  - 
+  - Players
+  - Obstacles
+  - Enemies
   - 
   - 
   - 

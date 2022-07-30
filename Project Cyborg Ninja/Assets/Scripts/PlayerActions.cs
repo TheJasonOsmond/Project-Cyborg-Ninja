@@ -11,55 +11,72 @@ public class PlayerActions : PlayerController
     [SerializeField] GameObject _playerBullet;
     [SerializeField] GameObject _bulletSpawn;
     float _bulletSpeed = 15f;
-    bool _firstFrame = true;
-    float _slowedSpeedModifier = 0.3f;
+    int _bulletDamage = 40;
 
     //Attack Fields
-    const string PLAYER_ATTACK_1 = "Player_attack_1";
+    public LayerMask enemyLayers; 
+    public Transform attackPoint;
+    public float attackRange;
+    int attackDamage = 100;
+
+    public int BulletDamage
+    {
+        get
+        {
+            return _bulletDamage;
+        }
+        set
+        {
+            _bulletDamage = value;
+        }
+    }
+
 
     protected override IEnumerator Fire()
     {
+
         GameObject bullet = Instantiate(_playerBullet, _bulletSpawn.transform.position, Quaternion.identity);
+        //bullet.GetComponent<Bullet>().BulletDamage = bulletDamage;
 
         bullet.GetComponent<Rigidbody2D>().velocity = MouseOffset * _bulletSpeed;
 
         yield return new WaitForSeconds(2);
         Destroy(bullet);
+
+
+
     }
 
-    protected override void Attack()
+    protected override IEnumerator Attack()
     {
+        isAttacking = true;
 
-        //ChangeAnimationState(PLAYER_ATTACK_1);
         //Play attack animation
+        animator.SetTrigger("Attack");
+
+        yield return new WaitForSeconds(.3f);
+
         //detect enemies in range of attack
+        Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(attackPoint.position, attackRange, enemyLayers);
+
         //damage them
-        //yield return new WaitForSeconds(2); 
-
-
-        
-        if (!animator.GetCurrentAnimatorStateInfo(0).IsName("Player_attack_1") && _firstFrame)
+        foreach (Collider2D enemy in hitEnemies)
         {
-            //This animation is already playing
-            inAnimation = true;
-            animator.SetTrigger("Attack");
-            //_moveSpeed = 3f;
-            //MoveDisabled = false;
-            _firstFrame = false;
+            enemy.GetComponent<Enemy>().takeDamage(attackDamage);
 
 
+            Debug.Log("We hit " + enemy.name + " for " + attackDamage);
         }
-        
-        else if (!animator.GetCurrentAnimatorStateInfo(0).IsName("Player_attack_1") && !_firstFrame)
-        { 
-            Debug.Log("End of Animation");
-            _firstFrame = true;
-            isAttacking = false;
-            inAnimation = false;
-        }
-            
+
+        isAttacking = false;
     }
 
+    private void OnDrawGizmosSelected()
+    {
+        if (attackPoint == null)
+            return;
 
+        Gizmos.DrawWireSphere(attackPoint.position, attackRange);
+    }
 
 }
