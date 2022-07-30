@@ -22,26 +22,28 @@ public class Enemy_Test : Enemy
 
     private void FixedUpdate()
     {
-        Collider2D ObjectInrange = Physics2D.OverlapCircle(attackPoint.position, attackRange, playersLayer);
-        bool playerInRange = ObjectInrange != null && ObjectInrange.gameObject.Equals(player);
-
-        if (!gameManager._gameOver && !disableEnemy && !_isAttacking && !playerInRange)
+        if (!gameManager._gameOver || disableEnemy)
         {
-            MoveEnemy();
-        }
+            Collider2D ObjectInrange = Physics2D.OverlapCircle(attackPoint.position, attackRange, playersLayer);
+            bool playerInRange = ObjectInrange != null && ObjectInrange.gameObject.Equals(player);
 
-        else if (_canAttack && playerInRange && !disableEnemy)
-        {
-            //Debug.Log("Player in range!");
-            StartCoroutine(Attack());
-            //Debug.Log("Got 'em");
-        }
-        else if (!_canAttack && playerInRange)
-        {
-            animator.SetInteger("AnimState", 1);
-            //rb.velocity = new Vector2(0f, 0f);
-        }
+            if (!_isAttacking && !playerInRange)
+            {
+                MoveEnemy();
+            }
 
+            else if (_canAttack && playerInRange && !disableEnemy)
+            {
+                //Debug.Log("Player in range!");
+                StartCoroutine(Attack());
+                //Debug.Log("Got 'em");
+            }
+            else if (!_canAttack && playerInRange)
+            {
+                animator.SetInteger("AnimState", 1);
+                //rb.velocity = new Vector2(0f, 0f);
+            }
+        }
     }
 
     void MoveEnemy()
@@ -75,25 +77,25 @@ public class Enemy_Test : Enemy
 
         //Play attack animation
         animator.SetTrigger("Attack");
-        Debug.Log("Attack!");
+        Debug.Log("Enemy Disabled = " + disableEnemy);
 
         rb.velocity = new Vector2(0f, 0f);
 
         yield return new WaitForSeconds(.5f);
 
-        if (currentHealth <= 0)
+        //Damage is only delt if enemy is alive
+        if (currentHealth >= 0)
         {
-            _canAttack = true;
-            yield break;
-        }
-        //detect enemies in range of attack
-        Collider2D[] hitPlayers = Physics2D.OverlapCircleAll(attackPoint.position, attackRange, playersLayer);
+            //detect enemies in range of attack
+            Collider2D[] hitPlayers = Physics2D.OverlapCircleAll(attackPoint.position, attackRange, playersLayer);
 
-        //damage them
-        foreach (Collider2D player in hitPlayers)
-        {
-            player.GetComponent<PlayerController>().takeDamage(attackDamage);
+            //damage them
+            foreach (Collider2D player in hitPlayers)
+            {
+                player.GetComponent<PlayerController>().takeDamage(attackDamage);
+            }
         }
+
         _isAttacking = false;
 
         //Attack Cooldown
