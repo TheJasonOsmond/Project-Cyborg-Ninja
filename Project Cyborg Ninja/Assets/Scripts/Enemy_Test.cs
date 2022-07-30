@@ -17,14 +17,8 @@ public class Enemy_Test : Enemy
     float _attackCooldown = 1f;
     public Transform attackPoint;
     public float attackRange;
-    int attackDamage = 20;
+    float attackDamage = 100f;
 
-    // Update is called once per frame
-    void Update()
-    {
-
-
-    }
 
     private void FixedUpdate()
     {
@@ -36,7 +30,7 @@ public class Enemy_Test : Enemy
             MoveEnemy();
         }
 
-        else if (_canAttack && playerInRange)
+        else if (_canAttack && playerInRange && !disableEnemy)
         {
             //Debug.Log("Player in range!");
             StartCoroutine(Attack());
@@ -73,7 +67,7 @@ public class Enemy_Test : Enemy
 
     protected override IEnumerator Attack()
     {
-        if (!_canAttack)
+        if (!_canAttack || disableEnemy)
             yield break;
 
         _canAttack = false;
@@ -81,11 +75,17 @@ public class Enemy_Test : Enemy
 
         //Play attack animation
         animator.SetTrigger("Attack");
+        Debug.Log("Attack!");
 
         rb.velocity = new Vector2(0f, 0f);
 
         yield return new WaitForSeconds(.5f);
 
+        if (currentHealth <= 0)
+        {
+            _canAttack = true;
+            yield break;
+        }
         //detect enemies in range of attack
         Collider2D[] hitPlayers = Physics2D.OverlapCircleAll(attackPoint.position, attackRange, playersLayer);
 

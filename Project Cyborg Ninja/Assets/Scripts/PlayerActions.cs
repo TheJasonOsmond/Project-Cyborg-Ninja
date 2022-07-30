@@ -11,16 +11,16 @@ public class PlayerActions : PlayerController
     [SerializeField] GameObject _playerBullet;
     [SerializeField] GameObject _bulletSpawn;
     float _bulletSpeed = 25f;
-    int _bulletDamage = 50;
+    float _bulletDamage = 50f;
 
 
     //Attack Fields
     public LayerMask enemyLayers; 
     public Transform attackPoint;
     public float attackRange;
-    int attackDamage = 100;
+    float attackDamage = 100f;
 
-    public int BulletDamage
+    public float BulletDamage
     {
         get
         {

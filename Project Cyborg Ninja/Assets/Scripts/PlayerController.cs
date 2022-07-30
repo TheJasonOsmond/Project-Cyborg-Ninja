@@ -4,18 +4,22 @@ using UnityEngine;
 
 public abstract class PlayerController : MonoBehaviour
 {
-    [SerializeField] GameManager _gameManager;
+    [SerializeField] protected GameManager gameManager;
     [SerializeField] GameObject aim_indicator;
     [SerializeField] TrailRenderer _tr;
     Rigidbody2D _rb;
     Camera _mainCamera;
 
+    public HealthBar healthbar;
+
     //Player Fields
     string _playerName = "OZ3N";
-    int _currentHealth = 100;
-    int _playerMaxHealth = 100;
-    int _playerLevel = 0;
+    float _currentHealth;
+    float _maxHealth = 100;
+    int _currentLevel = 0;
     float _invulnerableLength = 1f;
+
+
 
     //Mouse Fields
     Vector2 _mousePos;
@@ -23,11 +27,11 @@ public abstract class PlayerController : MonoBehaviour
     protected float aimAngle;
 
 
-
     //Event Fields
     protected bool isInvulnerable = false;
     protected bool isAiming = false;
     protected bool inAnimation = false;
+    private bool _isDead = false;
 
 
     //Movement Fields
@@ -44,7 +48,7 @@ public abstract class PlayerController : MonoBehaviour
 
     //Dash Fields
     bool _canDash = true;
-    bool _isdashing = false;
+    //bool _isdashing = false;
     float _dashSpeed = 14f;
     float _dashLength = 0.2f;
     float _dashCooldown = 0.5f;
@@ -84,6 +88,22 @@ public abstract class PlayerController : MonoBehaviour
 
     }
 
+    protected bool IsDead
+    {
+        get
+        {
+            return _isDead;
+        }
+
+        set
+        {
+            _isDead = true;
+            isInvulnerable = true;
+            MoveDisabled = true;
+            inAnimation = true; //TEMP, Add Disabled Field 
+        }
+    }
+
 
     // Start is called before the first frame update
     void Start()
@@ -91,6 +111,9 @@ public abstract class PlayerController : MonoBehaviour
         _rb = gameObject.GetComponent<Rigidbody2D>();
         animator = gameObject.GetComponent<Animator>();
         _mainCamera = Camera.main;
+
+        _currentHealth = _maxHealth;
+        healthbar.SetMaxHealth(_maxHealth);
 
     }
 
@@ -241,7 +264,7 @@ public abstract class PlayerController : MonoBehaviour
     IEnumerator Dash() 
     {
         _canDash = false;
-        _isdashing = true;
+        //_isdashing = true;
         _moveDisabled = true;
         isInvulnerable = true;
         inAnimation = true;
@@ -272,7 +295,7 @@ public abstract class PlayerController : MonoBehaviour
 
         yield return new WaitForSeconds(_dashLength);
 
-        _isdashing = false;
+        //_isdashing = false;
         _moveDisabled = false;
         inAnimation = false;
         isInvulnerable = false;
@@ -296,7 +319,7 @@ public abstract class PlayerController : MonoBehaviour
        
     }
 
-    public void takeDamage(int damage)
+    public void takeDamage(float damage)
     {
         if (isInvulnerable)
             return;
@@ -304,10 +327,12 @@ public abstract class PlayerController : MonoBehaviour
         animator.SetTrigger("Hurt");
         _currentHealth -= damage;
 
+        healthbar.SetHealth(_currentHealth);
+
         if (_currentHealth <= 0)
         {
             _currentHealth = 0;
-            //Death();
+            StartCoroutine(Death());
         }
         
         else StartCoroutine(InvulnerabiltyPeriod());
@@ -321,6 +346,31 @@ public abstract class PlayerController : MonoBehaviour
         yield return new WaitForSeconds(_invulnerableLength);
         isInvulnerable = false;
     }
+
+
+    IEnumerator Death()
+    {
+        IsDead = true;
+
+        
+
+        gameManager._gameOver = true;
+
+        //gameObject.GetComponent<BoxCollider2D>().enabled = false;
+
+        animator.SetTrigger("Death");
+
+        float length = animator.GetCurrentAnimatorStateInfo(0).length;
+        float speed = animator.GetCurrentAnimatorStateInfo(0).speed;
+        yield return new WaitForSeconds(length * speed);
+
+        Debug.Log("GAME OVER!");
+        _rb.velocity = new Vector2(0f, 0f);
+        //Destroy(gameObject);
+
+        //Do something when the animation is complete
+    }
+
 
     protected abstract IEnumerator Fire();
 
