@@ -352,8 +352,6 @@ public abstract class PlayerController : MonoBehaviour
     {
         IsDead = true;
 
-        
-
         gameManager._gameOver = true;
 
         //gameObject.GetComponent<BoxCollider2D>().enabled = false;

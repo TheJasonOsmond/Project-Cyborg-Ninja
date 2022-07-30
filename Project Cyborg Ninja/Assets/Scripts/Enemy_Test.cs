@@ -22,7 +22,7 @@ public class Enemy_Test : Enemy
 
     private void FixedUpdate()
     {
-        if (!gameManager._gameOver || disableEnemy)
+        if (!gameManager._gameOver && !disableEnemy)
         {
             Collider2D ObjectInrange = Physics2D.OverlapCircle(attackPoint.position, attackRange, playersLayer);
             bool playerInRange = ObjectInrange != null && ObjectInrange.gameObject.Equals(player);
@@ -77,14 +77,19 @@ public class Enemy_Test : Enemy
 
         //Play attack animation
         animator.SetTrigger("Attack");
-        Debug.Log("Enemy Disabled = " + disableEnemy);
+
 
         rb.velocity = new Vector2(0f, 0f);
 
-        yield return new WaitForSeconds(.5f);
+        float length = animator.GetCurrentAnimatorStateInfo(0).length;
+        float speed = animator.GetCurrentAnimatorStateInfo(0).speed;
+
+        Debug.Log("Enemy Start Attack");
+
+        yield return new WaitForSeconds(length * speed);
 
         //Damage is only delt if enemy is alive
-        if (currentHealth >= 0)
+        if (currentHealth > 0)
         {
             //detect enemies in range of attack
             Collider2D[] hitPlayers = Physics2D.OverlapCircleAll(attackPoint.position, attackRange, playersLayer);
@@ -92,6 +97,7 @@ public class Enemy_Test : Enemy
             //damage them
             foreach (Collider2D player in hitPlayers)
             {
+                Debug.Log("Enemy Damaged: " + player.name + "| Enemy Health: " + currentHealth);
                 player.GetComponent<PlayerController>().takeDamage(attackDamage);
             }
         }
