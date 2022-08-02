@@ -85,7 +85,9 @@ public class Enemy_Test : Enemy
         float speed = animator.GetCurrentAnimatorStateInfo(0).speed;
 
         Debug.Log("Enemy Start Attack");
+        Debug.Log("Animation Length: " + length + " | Animation Speed: " +  speed);
 
+        
         yield return new WaitForSeconds(length * speed);
 
         //Damage is only delt if enemy is alive
