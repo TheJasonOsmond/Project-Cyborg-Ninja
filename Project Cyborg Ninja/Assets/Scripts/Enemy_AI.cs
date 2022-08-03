@@ -5,39 +5,43 @@ using Pathfinding;
 
 public class Enemy_AI : MonoBehaviour
 {
+    //Public Fields
+    public float moveSpeed = 200f;
+    public bool stopMovement = false;
+    public Vector2 direction;
 
-    public Transform target;
-    public Transform enemyGFX;
-
-    [SerializeField] protected Animator animator;
-
-    public float moveSpeed = 200f; 
+    //Private Fields
+    [SerializeField] Transform target;
+    [SerializeField] Transform enemyGFX;
+    [SerializeField] Animator animator;
     [SerializeField] float nextWaypointDistance = 0.1f;
 
-    Path path;
-    int currentWaypoint = 0;
-    bool reachedEndOfPath = false;
-
     Seeker seeker;
+    Path path;
     Rigidbody2D rb;
 
+    int currentWaypoint = 0;
+    bool reachedEndOfPath = false;
     bool facingRight;
 
-
-    // Start is called before the first frame update
     void Start()
     {
         seeker = GetComponent<Seeker>();
         rb = GetComponent<Rigidbody2D>();
-        //animator = GetComponent<Animator>();
 
-        InvokeRepeating("UpdatePath", 0f, 0.5f); //Update path every 0.5 seconds
+        InvokeRepeating("UpdatePath", 0f, 0.2f); //Update path every 0.5 seconds
         
     }
     void UpdatePath()
     {
+        if (stopMovement)
+            return;
+
         if(seeker.IsDone())
             seeker.StartPath(rb.position, target.position, OnPathComplete);
+
+        if (direction != null)
+            AnimateMovement(direction);
     }
     void OnPathComplete (Path p)
     {
@@ -50,7 +54,7 @@ public class Enemy_AI : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (path == null)
+        if (path == null || stopMovement)
             return;
 
         if (currentWaypoint >= path.vectorPath.Count)
@@ -64,11 +68,10 @@ public class Enemy_AI : MonoBehaviour
             reachedEndOfPath = false;
         }
 
-        Vector2 direction = ((Vector2) path.vectorPath[currentWaypoint] - rb.position).normalized;
+        direction = ((Vector2) path.vectorPath[currentWaypoint] - rb.position).normalized;
         Vector2 force = direction * moveSpeed * Time.deltaTime;
 
         rb.AddForce(force);
-        AnimateMovement(direction);
 
         Debug.Log("X: " + direction.x + " | Y: " + direction.y);
         float distance = Vector2.Distance(rb.position, path.vectorPath[currentWaypoint]);
@@ -82,9 +85,10 @@ public class Enemy_AI : MonoBehaviour
 
     void AnimateMovement(Vector2 moveDirection)
     {
-        if (((Mathf.Abs(moveDirection.x) > 0.4f && (Mathf.Abs(rb.velocity.x) > 0.01f)) ||
-            (Mathf.Abs(moveDirection.x) > 0f && (Mathf.Abs(moveDirection.y) < 0.2f) && (Mathf.Abs(rb.velocity.y) > 0.01f)))
-            && (Mathf.Abs(rb.velocity.x) > 0.01f))
+        //if (((Mathf.Abs(moveDirection.x) > 0.4f && (Mathf.Abs(rb.velocity.x) > 0.01f)) ||
+        //    (Mathf.Abs(moveDirection.x) > 0f && (Mathf.Abs(moveDirection.y) < 0.5f) && (Mathf.Abs(rb.velocity.y) > 0.01f)))
+        //    && (Mathf.Abs(rb.velocity.x) > 0.01f))
+        if (Mathf.Abs(moveDirection.x) > Mathf.Abs(moveDirection.y))
         {
             animator.SetBool("isWalking", true);
             animator.SetInteger("facingDirection", 1);
@@ -104,7 +108,7 @@ public class Enemy_AI : MonoBehaviour
         }
         else if (Mathf.Abs(moveDirection.y) > 0f && (Mathf.Abs(rb.velocity.y) > 0.01f))
         {
-            //
+            //Up and Down Animation
             animator.SetBool("isWalking", true);
             if (moveDirection.y > 0f)
                 animator.SetInteger("facingDirection", 2);
