@@ -6,13 +6,13 @@ public class Enemy : MonoBehaviour
 {
     [SerializeField] Enemy_AI enemyMovement;
     [SerializeField] Collider2D col2D;
-    public Animator animator; //Reference Enemy GFX
+    public Animator animator; //Referencing Enemy GFX
 
     protected GameManager gameManager;
-    //protected Animator animator;
     protected GameObject player;
     protected Rigidbody2D rb;
     public HealthBar healthbar;
+    AnimTimes animTimes;
 
     bool enemyDisabled = false;
 
@@ -57,7 +57,7 @@ public class Enemy : MonoBehaviour
     {
         gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
         rb = gameObject.GetComponent<Rigidbody2D>();
-        //animator = gameObject.GetComponent<Animator>();
+        animTimes = gameObject.GetComponent<AnimTimes>();
         player = GameObject.FindGameObjectWithTag("Player");
 
         _currentHealth = _maxHealth;
@@ -89,9 +89,8 @@ public class Enemy : MonoBehaviour
 
         //Play Death Animation
         animator.SetTrigger("death");
-        float length = animator.GetCurrentAnimatorStateInfo(0).length;
-        float speed = animator.GetCurrentAnimatorStateInfo(0).speed;
-        yield return new WaitForSeconds(length * speed);
+
+        yield return new WaitForSeconds(animTimes.deathTime);
 
         //Delete Enemy
         Destroy(gameObject);
@@ -106,7 +105,6 @@ public class Enemy : MonoBehaviour
 
             Destroy(collision.gameObject);
         }
-
     }
 
     //protected abstract IEnumerator Attack();

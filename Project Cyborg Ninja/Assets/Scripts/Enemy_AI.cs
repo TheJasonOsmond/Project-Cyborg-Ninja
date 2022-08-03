@@ -11,7 +11,7 @@ public class Enemy_AI : MonoBehaviour
     public Vector2 direction;
 
     //Private Fields
-    [SerializeField] Transform target;
+    Transform target;
     [SerializeField] Transform enemyGFX;
     [SerializeField] Animator animator;
     [SerializeField] float nextWaypointDistance = 0.1f;
@@ -28,7 +28,7 @@ public class Enemy_AI : MonoBehaviour
     {
         seeker = GetComponent<Seeker>();
         rb = GetComponent<Rigidbody2D>();
-
+        target = GameObject.FindGameObjectWithTag("Player").transform;
         InvokeRepeating("UpdatePath", 0f, 0.2f); //Update path every 0.5 seconds
         
     }
