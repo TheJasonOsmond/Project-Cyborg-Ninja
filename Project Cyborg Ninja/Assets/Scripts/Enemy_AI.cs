@@ -73,7 +73,7 @@ public class Enemy_AI : MonoBehaviour
 
         rb.AddForce(force);
 
-        Debug.Log("X: " + direction.x + " | Y: " + direction.y);
+        //Debug.Log("X: " + direction.x + " | Y: " + direction.y);
         float distance = Vector2.Distance(rb.position, path.vectorPath[currentWaypoint]);
 
         if (distance < nextWaypointDistance)
@@ -101,7 +101,6 @@ public class Enemy_AI : MonoBehaviour
             }
             else if (rb.velocity.x <= -0.01 && moveDirection.x < 0f && facingRight)
             {
-                Debug.Log(animator.GetBool("isWalking"));
                 enemyGFX.localScale = new Vector3(1f, 1f, 1f);
                 facingRight = false;
             }
@@ -121,8 +120,11 @@ public class Enemy_AI : MonoBehaviour
                 //No Movement
                 animator.SetBool("isWalking", false);
                 Debug.Log("No Movement");
-
         }
 
+    }
+    public void DisableMovement()
+    {
+        stopMovement = true;
     }
 }

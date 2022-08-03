@@ -67,7 +67,7 @@ public class Enemy_Test : Enemy
 
     }
 
-    protected override IEnumerator Attack()
+    protected IEnumerator Attack()
     {
         if (!_canAttack || disableEnemy)
             yield break;

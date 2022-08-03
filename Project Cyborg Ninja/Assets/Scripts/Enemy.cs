@@ -2,15 +2,19 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class Enemy : MonoBehaviour
+public class Enemy : MonoBehaviour
 {
+    [SerializeField] Enemy_AI enemyMovement;
+    [SerializeField] Collider2D col2D;
+    public Animator animator; //Reference Enemy GFX
+
     protected GameManager gameManager;
-    protected Animator animator;
+    //protected Animator animator;
     protected GameObject player;
     protected Rigidbody2D rb;
     public HealthBar healthbar;
 
-    protected bool disableEnemy = false;
+    bool enemyDisabled = false;
 
     //Stats
     float _maxHealth = 100;
@@ -21,13 +25,23 @@ public abstract class Enemy : MonoBehaviour
     bool Stunned = false;
     protected bool isInvulnerable = false;
 
-
+    public bool disableEnemy
+    {
+        get
+        {
+            return enemyDisabled;
+        }
+        set
+        {
+            enemyDisabled = value;
+            enemyMovement.stopMovement = true;
+        }
+    }
     protected float currentHealth
     {
         get
         {
             return _currentHealth;
-
         }
 
         set
@@ -43,7 +57,7 @@ public abstract class Enemy : MonoBehaviour
     {
         gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
         rb = gameObject.GetComponent<Rigidbody2D>();
-        animator = gameObject.GetComponent<Animator>();
+        //animator = gameObject.GetComponent<Animator>();
         player = GameObject.FindGameObjectWithTag("Player");
 
         _currentHealth = _maxHealth;
@@ -55,50 +69,34 @@ public abstract class Enemy : MonoBehaviour
         if (isInvulnerable)
             return;
 
-        animator.SetTrigger("Hurt");
+        animator.SetTrigger("damaged");
         _currentHealth -= damage;
         healthbar.SetHealth(_currentHealth);
 
         if (_currentHealth <= 0)
         {
             _currentHealth = 0;
-            //Death();
-            StartCoroutine(Deathtest());
+            StartCoroutine(Death());
         }
     }
 
-
-    void Death()
+    IEnumerator Death()
     {
-        // Disable Enemy
+        Debug.Log("Start Death");
+        //Disable enemy interaction and collision
         disableEnemy = true;
-        // Die Animation
-        animator.SetTrigger("Death");
+        col2D.enabled = false;
 
-
-    }
-    IEnumerator Deathtest()
-    {
-        disableEnemy = true;
-        gameObject.GetComponent<BoxCollider2D>().enabled = false;
-
-        animator.SetTrigger("Death");
-
+        //Play Death Animation
+        animator.SetTrigger("death");
         float length = animator.GetCurrentAnimatorStateInfo(0).length;
         float speed = animator.GetCurrentAnimatorStateInfo(0).speed;
         yield return new WaitForSeconds(length * speed);
 
+        //Delete Enemy
         Destroy(gameObject);
-
-        //Do something when the animation is complete
+        Debug.Log("End Death");
     }
-
-
-
-    //public void Stunned (float duration)
-    //{
-
-    //}
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
@@ -111,5 +109,5 @@ public abstract class Enemy : MonoBehaviour
 
     }
 
-    protected abstract IEnumerator Attack();
+    //protected abstract IEnumerator Attack();
 }
