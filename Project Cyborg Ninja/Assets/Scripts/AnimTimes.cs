@@ -23,16 +23,19 @@ public class AnimTimes : MonoBehaviour
         }
 
         UpdateAnimClipTimes();
+        Debug.Log(attackTime);
     }
     public void UpdateAnimClipTimes()
     {
         AnimationClip[] clips = animator.runtimeAnimatorController.animationClips;
         foreach (AnimationClip clip in clips)
         {
+            Debug.Log(clip.name);
             switch (clip.name)
             {
+                
                 //Cases use name of motion file, not the name in animator
-                case "attack":
+                case "sycthe_side":
                     attackTime = clip.length;
                     break;
                 case "damaged":

@@ -1558,7 +1558,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: d5b3bfa25cd241d4a76c962095aa21a5, type: 2}
+  m_Motion: {fileID: 7400000, guid: b731ce055cfea8e459a27320fedae26a, type: 2}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -1683,7 +1683,7 @@ AnimatorState:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: carry_up
+  m_Name: aim_up
   m_Speed: 1
   m_CycleOffset: 0
   m_Transitions:
@@ -1697,7 +1697,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: 605eda53026645e791a5a3023f3a73be, type: 2}
+  m_Motion: {fileID: 7400000, guid: 1edf093c34ba6b2438fb6cfd6888d999, type: 2}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 

@@ -5,7 +5,10 @@ using UnityEngine;
 public class PlayerActions : Player
 {
 
-    //[SerializeField] Animator _animator;
+    //Attack Animation Extras **REMOVE WHEN ANIMATIONS ARE REPLACED
+    [SerializeField] Transform animAttackDown;
+    [SerializeField] Transform animAttackSide;
+    [SerializeField] Transform animAttackUp;
 
     //Bullet Fields
     [SerializeField] GameObject _playerBullet;
@@ -35,40 +38,69 @@ public class PlayerActions : Player
 
     }
 
+
     public override IEnumerator Attack()
     {
-        yield break;
+        playerController.isAttacking = true;
+
+        //Play attack animation
+        playerController.animator.SetTrigger("attack");
+
+        float animationLength = 0.7f;
+
+        //Debug.Log(playerController.animTimes.attackTime);
+
+        StartCoroutine(AnimateAttack(animationLength));
+        yield return new WaitForSeconds(animationLength);
+
+        //detect enemies in range of attack
+        Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(attackPoint.position, attackRange, enemyLayers);
+
+        //damage them
+        foreach (Collider2D enemy in hitEnemies)
+        {
+            enemy.GetComponent<Enemy>().takeDamage(attackDamage);
+
+            Debug.Log("We hit " + enemy.name + " for " + attackDamage);
+        }
+
+        playerController.isAttacking = false;
     }
-    //public override IEnumerator Attack()
-    //{
-    //    isAttacking = true;
 
-    //    //Play attack animation
-    //    animator.SetTrigger("attack");
+    private void OnDrawGizmosSelected()
+    {
+        if (attackPoint == null)
+            return;
 
-    //    yield return new WaitForSeconds(.3f);
+        Gizmos.DrawWireSphere(attackPoint.position, attackRange);
+    }
 
-    //    //detect enemies in range of attack
-    //    Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(attackPoint.position, attackRange, enemyLayers);
+    //Enables Additional Animation Sections **REMOVE WHEN ANIMATIONS ARE REPLACED
+    IEnumerator AnimateAttack(float duration)
+    {
+        if (!playerController.isAttacking)
+            yield break;
 
-    //    //damage them
-    //    foreach (Collider2D enemy in hitEnemies)
-    //    {
-    //        enemy.GetComponent<Enemy>().takeDamage(attackDamage);
+        int facingDirection = playerController.animator.GetInteger("facingDirection");
 
+        GameObject animationObject;
 
-    //        Debug.Log("We hit " + enemy.name + " for " + attackDamage);
-    //    }
+        if (facingDirection == 0)
+            animationObject = animAttackDown.gameObject;
 
-    //    isAttacking = false;
-    //}
+        else if (facingDirection == 1)
+            animationObject = animAttackSide.gameObject;
 
-    //private void OnDrawGizmosSelected()
-    //{
-    //    if (attackPoint == null)
-    //        return;
+        else if (facingDirection == 2)
+            animationObject = animAttackUp.gameObject;
+        else
+            yield break;
 
-    //    Gizmos.DrawWireSphere(attackPoint.position, attackRange);
-    //}
+        animationObject.SetActive(true);
 
+        yield return new WaitForSeconds(duration);
+
+        animationObject.SetActive(false);
+
+    }
 }

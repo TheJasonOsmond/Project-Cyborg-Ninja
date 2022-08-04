@@ -6,6 +6,7 @@ using UnityEngine;
 public class PlayerControllerNew : MonoBehaviour
 {
     public Animator animator;
+    public AnimTimes animTimes;
     
     Player player;
     Rigidbody2D rb;
@@ -24,7 +25,7 @@ public class PlayerControllerNew : MonoBehaviour
     public bool isAiming = false;
 
     //Private State Fields
-    bool facingRight;
+    bool isFlipped;
     Vector2 moveVelocity;
     float moveSpeedLimiter = 0.7f;
 
@@ -100,10 +101,10 @@ public class PlayerControllerNew : MonoBehaviour
             //SPACE to dash
             if (Input.GetKeyDown(KeyCode.Space) && canDash)
                 StartCoroutine(Dash());
+
+            else if (Input.GetMouseButtonDown(0) && canAttack)
+                StartCoroutine(player.Attack());
         }
-
-
-
     }
 
     void FixedUpdate()
@@ -158,15 +159,15 @@ public class PlayerControllerNew : MonoBehaviour
             animator.SetInteger("facingDirection", 1);
 
             //Flip if needed
-            if (rb.velocity.x >= 0.01f && moveDirection.x > 0f && !facingRight)
+            if (rb.velocity.x >= 0.01f && moveDirection.x > 0f && !isFlipped)
             {
                 enemyGFX.localScale = new Vector3(-1f, 1f, 1f);
-                facingRight = true;
+                isFlipped = true;
             }
-            else if (rb.velocity.x <= -0.01 && moveDirection.x < 0f && facingRight)
+            else if (rb.velocity.x <= -0.01 && moveDirection.x < 0f && isFlipped)
             {
                 enemyGFX.localScale = new Vector3(1f, 1f, 1f);
-                facingRight = false;
+                isFlipped = false;
             }
         }
         else if (Mathf.Abs(moveDirection.y) > 0f && (Mathf.Abs(rb.velocity.y) > 0.01f))
@@ -223,7 +224,7 @@ public class PlayerControllerNew : MonoBehaviour
             else if (direction == 2)
                 inputVertical = -1;
             
-            else if (facingRight) 
+            else if (isFlipped) 
                 inputHorizontal = 1;
 
             else 

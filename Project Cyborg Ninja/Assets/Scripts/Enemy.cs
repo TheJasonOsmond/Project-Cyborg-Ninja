@@ -100,15 +100,7 @@ public class Enemy : MonoBehaviour
         Debug.Log("End Death");
     }
 
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        if (collision.gameObject.tag == "Player Bullet")
-        {
-            takeDamage(player.GetComponent<PlayerActions>().bulletDamage) ;
 
-            Destroy(collision.gameObject);
-        }
-    }
 
     //protected abstract IEnumerator Attack();
 }
