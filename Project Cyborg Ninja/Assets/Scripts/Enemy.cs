@@ -90,6 +90,9 @@ public class Enemy : MonoBehaviour
         //Play Death Animation
         animator.SetTrigger("death");
 
+
+        //Waits for Animation to finish
+        animator.speed = 1;
         yield return new WaitForSeconds(animTimes.deathTime);
 
         //Delete Enemy
