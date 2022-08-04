@@ -786,6 +786,7 @@ MonoBehaviour:
   animator: {fileID: 1185272029}
   aimIndicator: {fileID: 1826715754}
   enemyGFX: {fileID: 1185272028}
+  tr: {fileID: 1185272031}
   allowInput: 1
   canMove: 1
   canDash: 1
@@ -808,6 +809,9 @@ MonoBehaviour:
   isInvulnerable: 0
   moveSpeed: 0
   attackMoveSpeedMod: 0.3
+  dashSpeedMod: 3
+  dashDuration: 0.2
+  dashCooldown: 0.5
 --- !u!1 &885727263
 GameObject:
   m_ObjectHideFlags: 0

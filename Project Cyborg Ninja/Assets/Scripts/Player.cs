@@ -27,13 +27,36 @@ public class Player : MonoBehaviour
     public float attackMoveSpeedMod = 0.3f;
 
     //Dashing
-    protected float _dashSpeed = 14f;
-    protected float _dashLength = 0.2f;
-    protected float _dashCooldown = 0.5f;
-    protected int _dashCount = 1;
+    //[HideInInspector] public float dashSpeedMod = 12f;
+    //[HideInInspector] public float dashDuration= 0.5f;
+    //[HideInInspector] public float dashCooldown = 2f;
+    [HideInInspector] int maxDashCount = 2;
+    [HideInInspector] int dashCount;
 
-    
-    
+    public float dashSpeedMod = 12f;
+    public float dashDuration = 0.5f;
+    public float dashCooldown = 2f;
+
+
+    public int dashCounter
+    {
+        get
+        {
+            return dashCount;
+        }
+        set
+        {
+            dashCount = value;
+            if (dashCount < 0)
+                dashCount = 0;
+            else if (dashCount > maxDashCount)
+                dashCount = maxDashCount;
+        }
+    }
+
+
+
+
 
 
     // Start is called before the first frame update
@@ -43,6 +66,8 @@ public class Player : MonoBehaviour
         healthbar.SetMaxHealth(maxHealth);
 
         moveSpeed = baseMoveSpeed * moveSpeedMod;
+        dashCount = maxDashCount;
+
     }
 
     // Update is called once per frame

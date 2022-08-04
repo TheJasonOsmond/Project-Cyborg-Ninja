@@ -13,6 +13,7 @@ public class PlayerControllerNew : MonoBehaviour
 
     [SerializeField] GameObject aimIndicator;
     [SerializeField] Transform enemyGFX;
+    [SerializeField] TrailRenderer tr;
 
     //Public State Fields
     public bool allowInput = true;
@@ -57,6 +58,7 @@ public class PlayerControllerNew : MonoBehaviour
             isAiming = true;
             canMove = false;
             aimIndicator.SetActive(true);
+            animator.SetBool("isAiming", true);
         }
 
         else if (Input.GetKey(KeyCode.LeftShift))
@@ -68,6 +70,7 @@ public class PlayerControllerNew : MonoBehaviour
                 isAiming = true;
                 canMove = false;
                 aimIndicator.SetActive(true);
+                animator.SetBool("isAiming", true);
             }
 
             //Press MOUSE1 to Shoot
@@ -93,6 +96,10 @@ public class PlayerControllerNew : MonoBehaviour
             inputVertical = Input.GetAxisRaw("Vertical");
 
             moveVelocity = new Vector2(inputHorizontal, inputVertical) * player.moveSpeed;
+
+            //SPACE to dash
+            if (Input.GetKeyDown(KeyCode.Space) && canDash)
+                StartCoroutine(Dash());
         }
 
 
@@ -104,8 +111,6 @@ public class PlayerControllerNew : MonoBehaviour
         if (isAiming)
         {
             moveVelocity = new Vector2(0f, 0f);
-
-            AnimateMovement(moveVelocity);
             rb.velocity = moveVelocity;
 
             Aim();
@@ -134,19 +139,6 @@ public class PlayerControllerNew : MonoBehaviour
 
             //Physics
             rb.velocity = moveVelocity;
-
-            //Animate Movement
-            //if (inputHorizontal > 0 || inputHorizontal < 0)
-            //    animator.SetInteger("facingDirection", 1);
-
-            //else if (inputVertical < 0)
-            //    animator.SetInteger("facingDirection", 0);
-
-            //else if (inputVertical > 0)
-            //    animator.SetInteger("facingDirection", 2);
-
-
-            //ChangeAnimationState(PLAYER_WALK_RIGHT);
         }
 
         // Don't move
@@ -158,22 +150,6 @@ public class PlayerControllerNew : MonoBehaviour
 
         AnimateMovement(rb.velocity);
     }
-
-    void Aim()
-    {
-        _mousePos = Input.mousePosition;
-        Vector3 screenPoint = mainCamera.WorldToScreenPoint(transform.localPosition);
-        _mouseOffset = new Vector2(_mousePos.x - screenPoint.x, _mousePos.y - screenPoint.y).normalized;
-
-        //Get angle between offsets in degrees. y axis first, otherwise it will mirror its rotation
-        aimAngle = Mathf.Atan2(_mouseOffset.y, _mouseOffset.x) * Mathf.Rad2Deg; 
-
-        aimIndicator.transform.rotation = Quaternion.Euler(0f, 0f, aimAngle - 90f); //-90, fixes angle
-        //transform.rotation = Quaternion.Euler(0f, 0f, angle - 90f); //-90, fixes angle
-
-    }
-
-
     void AnimateMovement(Vector2 moveDirection)
     {
         if (Mathf.Abs(moveDirection.x) > Mathf.Abs(moveDirection.y))
@@ -207,8 +183,76 @@ public class PlayerControllerNew : MonoBehaviour
         {
             //No Movement
             animator.SetBool("isWalking", false);
-            Debug.Log("No Movement");
         }
 
     }
+    void Aim()
+    {
+        _mousePos = Input.mousePosition;
+        Vector3 screenPoint = mainCamera.WorldToScreenPoint(transform.localPosition);
+        _mouseOffset = new Vector2(_mousePos.x - screenPoint.x, _mousePos.y - screenPoint.y).normalized;
+
+        //Get angle between offsets in degrees. y axis first, otherwise it will mirror its rotation
+        aimAngle = Mathf.Atan2(_mouseOffset.y, _mouseOffset.x) * Mathf.Rad2Deg; 
+
+        aimIndicator.transform.rotation = Quaternion.Euler(0f, 0f, aimAngle - 90f); //-90, fixes angle
+        //transform.rotation = Quaternion.Euler(0f, 0f, angle - 90f); //-90, fixes angle
+
+    }
+
+    IEnumerator Dash()
+    {
+        if (player.dashCounter == 0)
+            yield break;
+
+        player.dashCounter--;
+        canDash = false;
+        canMove = false;
+        allowInput = false;
+        player.isInvulnerable = true;
+        tr.emitting = true;
+
+        //If no input, dash forwards
+        if (inputHorizontal == 0 && inputVertical == 0)
+        {
+            int direction = animator.GetInteger("facingDirection");
+
+            if (direction == 0)
+                inputVertical = -1;
+            
+            else if (direction == 2)
+                inputVertical = -1;
+            
+            else if (facingRight) 
+                inputHorizontal = 1;
+
+            else 
+                inputHorizontal = -1;
+
+        }
+
+        Vector2 dashVelocity = new Vector2(inputHorizontal, inputVertical) * player.moveSpeed * player.dashSpeedMod;
+
+        //if diagonal movement, reduce speed
+        if (inputHorizontal != 0 && inputVertical != 0)
+        {
+            dashVelocity *= moveSpeedLimiter;
+        }
+
+        rb.velocity = dashVelocity;
+
+        animator.SetTrigger("dash");
+
+        yield return new WaitForSeconds(player.dashDuration);
+
+        canDash = true;
+        canMove = true;
+        allowInput = true;
+        player.isInvulnerable = false;
+        tr.emitting = false;
+
+        yield return new WaitForSeconds(player.dashCooldown);
+        player.dashCounter++;
+    }
 }
+
