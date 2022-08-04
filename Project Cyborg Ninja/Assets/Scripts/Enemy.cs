@@ -104,7 +104,7 @@ public class Enemy : MonoBehaviour
     {
         if (collision.gameObject.tag == "Player Bullet")
         {
-            takeDamage(player.GetComponent<PlayerActions>().BulletDamage) ;
+            takeDamage(player.GetComponent<PlayerActions>().bulletDamage) ;
 
             Destroy(collision.gameObject);
         }

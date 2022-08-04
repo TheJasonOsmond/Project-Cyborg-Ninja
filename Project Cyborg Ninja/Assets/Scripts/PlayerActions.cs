@@ -10,9 +10,9 @@ public class PlayerActions : Player
     //Bullet Fields
     [SerializeField] GameObject _playerBullet;
     [SerializeField] GameObject _bulletSpawn;
-    float _bulletSpeed = 25f;
-    float _bulletDamage = 50f;
-
+    public float bulletDamage = 50f;
+    float bulletSpeed = 25f;
+    
 
     //Attack Fields
     public LayerMask enemyLayers; 
@@ -20,36 +20,26 @@ public class PlayerActions : Player
     public float attackRange;
     float attackDamage = 100f;
 
-    public float BulletDamage
+
+    public override IEnumerator Fire()
     {
-        get
-        {
-            return _bulletDamage;
-        }
-        set
-        {
-            _bulletDamage = value;
-        }
+
+        GameObject bullet = Instantiate(_playerBullet, _bulletSpawn.transform.position, Quaternion.identity);
+        //bullet.GetComponent<Bullet>().BulletDamage = bulletDamage;
+
+        bullet.GetComponent<Rigidbody2D>().velocity = playerController.mouseOffset * bulletSpeed;
+        bullet.transform.rotation = Quaternion.Euler(0f, 0f, playerController.aimAngle);
+
+        yield return new WaitForSeconds(2);
+        Destroy(bullet);
+
     }
 
-
-    //protected override IEnumerator Fire()
-    //{
-
-    //    GameObject bullet = Instantiate(_playerBullet, _bulletSpawn.transform.position, Quaternion.identity);
-    //    //bullet.GetComponent<Bullet>().BulletDamage = bulletDamage;
-
-    //    bullet.GetComponent<Rigidbody2D>().velocity = MouseOffset * _bulletSpeed;
-    //    bullet.transform.rotation = Quaternion.Euler(0f, 0f, aimAngle );
-
-    //    yield return new WaitForSeconds(2);
-    //    Destroy(bullet);
-
-
-
-    //}
-
-    //protected override IEnumerator Attack()
+    public override IEnumerator Attack()
+    {
+        yield break;
+    }
+    //public override IEnumerator Attack()
     //{
     //    isAttacking = true;
 

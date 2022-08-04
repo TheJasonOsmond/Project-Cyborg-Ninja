@@ -5,39 +5,38 @@ using UnityEngine;
 
 //Controls stats and allowed actions
 //Children are different playable "classes"
-public class Player : MonoBehaviour
+public abstract class Player : MonoBehaviour
 {
     //Initialize Objects
+    [Header("Objects")]
     public HealthBar healthbar;
+    public PlayerControllerNew playerController;
 
     //Default Player Stats
     private string playerName = "OZ3N";
-    protected float maxHealth;
+    protected float maxHealth = 100;
     protected float currentHealth;
     protected int currentLevel = 0;
     protected float invulnerableLength = 1f;
 
     //Player States
+    [Header("Player States")]
     public bool isInvulnerable = false;
 
     //Movement
-    protected float baseMoveSpeed = 5f;
-    protected float moveSpeedMod = 1f;
+    [Header("Movement")]
     public float moveSpeed;
     public float attackMoveSpeedMod = 0.3f;
+    protected float baseMoveSpeed = 5f;
+    protected float moveSpeedMod = 1f;
 
     //Dashing
-    //[HideInInspector] public float dashSpeedMod = 12f;
-    //[HideInInspector] public float dashDuration= 0.5f;
-    //[HideInInspector] public float dashCooldown = 2f;
-    [HideInInspector] int maxDashCount = 2;
-    [HideInInspector] int dashCount;
-
-    public float dashSpeedMod = 12f;
-    public float dashDuration = 0.5f;
+    [Header("Dashing")]
+    public float dashSpeedMod = 5f;
+    public float dashDuration = 0.2f;
     public float dashCooldown = 2f;
-
-
+    int maxDashCount = 2;
+    int dashCount;
     public int dashCounter
     {
         get
@@ -55,13 +54,10 @@ public class Player : MonoBehaviour
     }
 
 
-
-
-
-
     // Start is called before the first frame update
     void Start()
     {
+
         currentHealth = maxHealth;
         healthbar.SetMaxHealth(maxHealth);
 
@@ -70,13 +66,7 @@ public class Player : MonoBehaviour
 
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    public abstract IEnumerator Fire();
 
-    //public abstract IEnumerator Fire();
-
-    //public abstract IEnumerator Attack();
+    public abstract IEnumerator Attack();
 }

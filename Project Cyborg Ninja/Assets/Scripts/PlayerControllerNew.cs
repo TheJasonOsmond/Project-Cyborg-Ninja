@@ -33,9 +33,9 @@ public class PlayerControllerNew : MonoBehaviour
     float inputHorizontal;
 
     //Mouse Input Fields
-    Vector2 _mousePos;
-    Vector2 _mouseOffset;
-    protected float aimAngle;
+    [HideInInspector] public Vector2 mouseOffset;
+    [HideInInspector] public float aimAngle;
+    Vector2 mousePos;
 
     // Start is called before the first frame update
     void Start()
@@ -77,7 +77,7 @@ public class PlayerControllerNew : MonoBehaviour
             if (Input.GetMouseButtonDown(0))
             {
                 Debug.Log("Pew!");
-                //StartCoroutine(player.Fire());
+                StartCoroutine(player.Fire());
             }
         }
 
@@ -188,12 +188,12 @@ public class PlayerControllerNew : MonoBehaviour
     }
     void Aim()
     {
-        _mousePos = Input.mousePosition;
+        mousePos = Input.mousePosition;
         Vector3 screenPoint = mainCamera.WorldToScreenPoint(transform.localPosition);
-        _mouseOffset = new Vector2(_mousePos.x - screenPoint.x, _mousePos.y - screenPoint.y).normalized;
+        mouseOffset = new Vector2(mousePos.x - screenPoint.x, mousePos.y - screenPoint.y).normalized;
 
         //Get angle between offsets in degrees. y axis first, otherwise it will mirror its rotation
-        aimAngle = Mathf.Atan2(_mouseOffset.y, _mouseOffset.x) * Mathf.Rad2Deg; 
+        aimAngle = Mathf.Atan2(mouseOffset.y, mouseOffset.x) * Mathf.Rad2Deg; 
 
         aimIndicator.transform.rotation = Quaternion.Euler(0f, 0f, aimAngle - 90f); //-90, fixes angle
         //transform.rotation = Quaternion.Euler(0f, 0f, angle - 90f); //-90, fixes angle
